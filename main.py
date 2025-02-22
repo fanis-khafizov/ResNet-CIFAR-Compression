@@ -164,6 +164,10 @@ if __name__ == "__main__":
                 compressor = compressors.ImpK_c_EF(net, param_usage, start=start, scale=scale)
             elif compression_type == 'ImpK_c_EF21':
                 compressor = compressors.ImpK_c_EF21(net, param_usage, start=start, scale=scale)
+            elif compression_type == 'SCAM_b_EF':
+                compressor = compressors.SCAM_b_EF(net, param_usage, start=start)
+            elif compression_type == 'SCAM_c_EF':
+                compressor = compressors.SCAM_c_EF(net, param_usage, start=start, scale=scale)
             else:
                 raise ValueError(f"Unknown compression type: {compression_type}")
             
