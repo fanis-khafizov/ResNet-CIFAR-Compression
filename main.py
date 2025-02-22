@@ -38,17 +38,24 @@ if __name__ == "__main__":
         #     'compression_type': 'TopK',
         #     'lr': 0.05,
         # },
-        {
-            'compression_type': 'TopK_EF',
-            'lr': 0.01,
-        },
+        # {
+        #     'compression_type': 'TopK_EF',
+        #     'lr': 0.01,
+        # },
         # {
         #     'compression_type': 'ImpK_b_EF',
         #     'start': 'ones',
-        #     'lr': 0.01,
+        #     'lr': 0.001,
         #     'eta': 1000000.,
         #     'num_steps': 25,
         # },
+        {
+            'compression_type': 'SCAM_b_EF',
+            'start': 'ones',
+            'lr': 0.01,
+            'eta': 1000000.,
+            'num_steps': 25,
+        },
         # {
         #     'compression_type': 'ImpK_b',
         #     'start': 'ones',
@@ -94,8 +101,16 @@ if __name__ == "__main__":
         #     'num_steps': 20,
         #     'scale': 1.0,
         # },
+        # {
+        #     'compression_type': 'ImpK_c_EF',
+        #     'start': 'ones',
+        #     'lr': 0.001,
+        #     'eta': 1000000.,
+        #     'num_steps': 25,
+        #     'scale': 1.0,
+        # },
         {
-            'compression_type': 'ImpK_c_EF',
+            'compression_type': 'SCAM_c_EF',
             'start': 'ones',
             'lr': 0.01,
             'eta': 1000000.,
