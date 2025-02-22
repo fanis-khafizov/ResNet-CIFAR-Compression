@@ -38,17 +38,17 @@ if __name__ == "__main__":
         #     'compression_type': 'TopK',
         #     'lr': 0.05,
         # },
-        # {
-        #     'compression_type': 'TopK_EF',
-        #     'lr': 0.001,
-        # },
         {
-            'compression_type': 'ImpK_b_EF',
-            'start': 'ones',
-            'lr': 0.001,
-            'eta': 1000000.,
-            'num_steps': 25,
+            'compression_type': 'TopK_EF',
+            'lr': 0.01,
         },
+        # {
+        #     'compression_type': 'ImpK_b_EF',
+        #     'start': 'ones',
+        #     'lr': 0.01,
+        #     'eta': 1000000.,
+        #     'num_steps': 25,
+        # },
         # {
         #     'compression_type': 'ImpK_b',
         #     'start': 'ones',
@@ -76,6 +76,7 @@ if __name__ == "__main__":
         #     'lr': 0.01,
         #     'eta': 1000000.,
         #     'num_steps': 25,
+        #     'scale': 1.0,
         # },
         # {
         #     'compression_type': 'ImpK_c',
@@ -83,6 +84,7 @@ if __name__ == "__main__":
         #     'lr': 0.015,
         #     'eta': 1000000.,
         #     'num_steps': 20,
+        #     'scale': 1.0,
         # },
         # {
         #     'compression_type': 'ImpK_c',
@@ -90,14 +92,16 @@ if __name__ == "__main__":
         #     'lr': 0.02,
         #     'eta': 1000000.,
         #     'num_steps': 20,
+        #     'scale': 1.0,
         # },
-        # {
-        #     'compression_type': 'ImpK_c',
-        #     'start': 'center',
-        #     'lr': 0.01,
-        #     'eta': 1000000.,
-        #     'num_steps': 25,
-        # },
+        {
+            'compression_type': 'ImpK_c_EF',
+            'start': 'ones',
+            'lr': 0.01,
+            'eta': 1000000.,
+            'num_steps': 25,
+            'scale': 1.0,
+        },
     ]
 
 
@@ -115,6 +119,7 @@ if __name__ == "__main__":
         lr = compress_config.get('lr', '')
         eta = compress_config.get('eta', '')
         num_steps = compress_config.get('num_steps', '')
+        scale=compress_config.get('scale', '')
 
         name = f'{compression_type}_{start}_{lr}'
 
@@ -139,11 +144,11 @@ if __name__ == "__main__":
             elif compression_type == 'ImpK_b_EF21':
                 compressor = compressors.ImpK_b_EF21(net, param_usage, start=start)
             elif compression_type == 'ImpK_c':
-                compressor = compressors.ImpK_c(net, param_usage, start=start)
+                compressor = compressors.ImpK_c(net, param_usage, start=start, scale=scale)
             elif compression_type == 'ImpK_c_EF':
-                compressor = compressors.ImpK_c_EF(net, param_usage, start=start)
+                compressor = compressors.ImpK_c_EF(net, param_usage, start=start, scale=scale)
             elif compression_type == 'ImpK_c_EF21':
-                compressor = compressors.ImpK_c_EF21(net, param_usage, start=start)
+                compressor = compressors.ImpK_c_EF21(net, param_usage, start=start, scale=scale)
             else:
                 raise ValueError(f"Unknown compression type: {compression_type}")
             
