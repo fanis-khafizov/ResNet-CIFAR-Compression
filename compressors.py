@@ -11,7 +11,7 @@ class TopK:
         pass
 
     def compress(self, name, param):
-        k = int(self.k * param.numel())
+        k = ceil(self.k * param.numel())
         tensor = param.grad.view(-1)  # Flatten the tensor to a vector
         topk_values, topk_indices = tensor.abs().topk(k)
         mask = torch.zeros_like(tensor, dtype=torch.bool)
@@ -31,7 +31,7 @@ class TopK_EF21:
 
     def compress(self, name, param):
         # compression of difference
-        k = int(self.k * param.numel())
+        k = ceil(self.k * param.numel())
         tensor = (param.grad - self.g[name]).view(-1)  # Flatten the tensor to a vector
         topk_values, topk_indices = tensor.abs().topk(k)
         mask = torch.zeros_like(tensor, dtype=torch.bool)
@@ -52,7 +52,7 @@ class TopK_EF:
 
     def compress(self, name, param):
         # compression of difference
-        k = int(self.k * param.numel())
+        k = ceil(self.k * param.numel())
         tensor = (param.grad + self.e[name]).view(-1)  # Flatten the tensor to a vector
         topk_values, topk_indices = tensor.abs().topk(k)
         mask = torch.zeros_like(tensor, dtype=torch.bool)
@@ -71,7 +71,7 @@ class RandK:
         pass
 
     def compress(self, name, param):
-        k = int(self.k * param.numel())
+        k = ceil(self.k * param.numel())
         tensor = param.grad
         mask = torch.randperm(tensor.numel()) < k
         mask = mask.view(tensor.size())
@@ -110,7 +110,7 @@ class ImpK_b:
             # print(f'{name} min: {self.w[name].min():.5f}, max: {self.w[name].max():.5f}, min/max: {self.w[name].min()/self.w[name].max():.3f}')
 
     def compress(self, name, param):
-        k = int(self.k * param.numel())
+        k = ceil(self.k * param.numel())
 
         tensor = (param.grad * self.w[name]).view(-1)  # Flatten the tensor to a vector
         topk_values, topk_indices = tensor.abs().topk(k)
@@ -153,7 +153,7 @@ class ImpK_b_EF21:
             )
 
     def compress(self, name, param):
-        k = int(self.k * param.numel())
+        k = ceil(self.k * param.numel())
         tensor = (param.grad * self.w[name] - self.g[name]).view(-1)  # Flatten the tensor to a vector
         topk_values, topk_indices = tensor.abs().topk(k)
         mask = torch.zeros_like(tensor, dtype=torch.bool)
@@ -249,7 +249,7 @@ class ImpK_c:
 
 
     def compress(self, name, param):
-        k = int(self.k * param.numel())
+        k = ceil(self.k * param.numel())
 
         tensor = param.grad * self.w[name]
         tensor = tensor.view(-1)  # Flatten the tensor to a vector
@@ -299,7 +299,7 @@ class ImpK_c_EF21:
 
 
     def compress(self, name, param):
-        k = int(self.k * param.numel())
+        k = ceil(self.k * param.numel())
         tensor = (param.grad * self.w[name] - self.g[name]).view(-1)  # Flatten the tensor to a vector
         topk_values, topk_indices = tensor.abs().topk(k)
         mask = torch.zeros_like(tensor, dtype=torch.bool)
@@ -346,7 +346,7 @@ class ImpK_c_EF:
 
 
     def compress(self, name, param):
-        k = int(self.k * param.numel())
+        k = ceil(self.k * param.numel())
         tensor = (param.grad * self.w[name] + self.e[name]).view(-1)  # Flatten the tensor to a vector
         topk_values, topk_indices = tensor.abs().topk(k)
         mask = torch.zeros_like(tensor, dtype=torch.bool)
