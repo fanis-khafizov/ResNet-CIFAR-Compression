@@ -14,17 +14,42 @@ if __name__ == "__main__":
 
     trainloader, testloader, classes = load_data()
     device = get_device()
+    print(device)
 
     config = {
-        'param_usage': 0.01,
+        'param_usage': 0.005,
         'num_restarts': 1,
-        'num_epochs': 12,
+        'num_epochs': 50,
     }
 
     compress_configs = [
         # {
         #     'compression_type': 'TopK',
+        #     'lr': 0.05,
+        # },
+        # {
+        #     'compression_type': 'TopK',
+        #     'lr': 0.075,
+        # },
+        # {
+        #     'compression_type': 'TopK',
+        #     'lr': 0.01,
+        # },
+        # {
+        #     'compression_type': 'TopK_EF',
         #     'lr': 0.005,
+        # },
+        # {
+        #     'compression_type': 'TopK_EF',
+        #     'lr': 0.0025,
+        # },
+        # {
+        #     'compression_type': 'TopK_EF',
+        #     'lr': 0.001,
+        # },
+        # {
+        #     'compression_type': 'TopK_EF',
+        #     'lr': 0.00075,
         # },
         # {
         #     'compression_type': 'TopK',
@@ -49,34 +74,41 @@ if __name__ == "__main__":
         #     'eta': 1000000.,
         #     'num_steps': 25,
         # },
+        # {
+        #     'compression_type': 'SCAM_b_EF',
+        #     'start': 'ones',
+        #     'lr': 0.01,
+        #     'eta': 1000000.,
+        #     'num_steps': 25,
+        # },
         {
-            'compression_type': 'SCAM_b_EF',
+            'compression_type': 'ImpK_b',
             'start': 'ones',
             'lr': 0.01,
             'eta': 1000000.,
             'num_steps': 25,
         },
-        # {
-        #     'compression_type': 'ImpK_b',
-        #     'start': 'ones',
-        #     'lr': 0.01,
-        #     'eta': 7.,
-        #     'num_steps': 25,
-        # },
-        # {
-        #     'compression_type': 'ImpK_b',
-        #     'start': 'ones',
-        #     'lr': 0.02,
-        #     'eta': 2.,
-        #     'num_steps': 20,
-        # },
-        # {
-        #     'compression_type': 'ImpK_b',
-        #     'start': 'abs',
-        #     'lr': 0.01,
-        #     'eta': 2.,
-        #     'num_steps': 20,
-        # },
+        {
+            'compression_type': 'ImpK_b',
+            'start': 'ones',
+            'lr': 0.005,
+            'eta': 1000000.,
+            'num_steps': 25,
+        },
+        {
+            'compression_type': 'ImpK_b',
+            'start': 'ones',
+            'lr': 0.0025,
+            'eta': 1000000.,
+            'num_steps': 25,
+        },
+        {
+            'compression_type': 'ImpK_b',
+            'start': 'ones',
+            'lr': 0.001,
+            'eta': 1000000.,
+            'num_steps': 25,
+        },
         # {
         #     'compression_type': 'ImpK_c_EF21',
         #     'start': 'ones',
@@ -109,14 +141,14 @@ if __name__ == "__main__":
         #     'num_steps': 25,
         #     'scale': 1.0,
         # },
-        {
-            'compression_type': 'SCAM_c_EF',
-            'start': 'ones',
-            'lr': 0.01,
-            'eta': 1000000.,
-            'num_steps': 25,
-            'scale': 1.0,
-        },
+        # {
+        #     'compression_type': 'SCAM_c_EF',
+        #     'start': 'ones',
+        #     'lr': 0.01,
+        #     'eta': 1000000.,
+        #     'num_steps': 25,
+        #     'scale': 1.0,
+        # },
     ]
 
 
@@ -201,129 +233,18 @@ if __name__ == "__main__":
             test_log[name].append(test_loss)
             test_acc[name].append(test_accuracy)
 
-    print("# Train Loss")
-    print(train_log)
-    print("# Train Accuracy")
-    print(train_acc)
-    print("# Test Loss")
-    print(test_log)
-    print("# Test Accuracy")
-    print(test_acc)
+        print("# Train Loss")
+        print(train_log)
+        print("# Train Accuracy")
+        print(train_acc)
+        print("# Test Loss")
+        print(test_log)
+        print("# Test Accuracy")
+        print(test_acc)
 
-    log_dir = 'logs'
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-
-    date = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_file = os.path.join(log_dir, f"training_log_{date}.csv")
-
-    with open(log_file, 'w', newline='') as csvfile:
-        fieldnames = ['type', 'train_log', 'train_acc', 'test_log', 'test_acc', 'epoch']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-
-        for compress_config in compress_configs:
-            compression_type = compress_config['compression_type']
-            start = compress_config.get('start', '')
-            lr = compress_config.get('lr', '')
-            eta = compress_config.get('eta', '')
-            num_steps = compress_config.get('num_steps', '')
-
-            name = f'{compression_type}_{param_usage*100:.0f}%_{lr}_{"EF" if "EF" in compression_type else ""}'
-
-            for epoch in range(num_epochs):
-                for restart in range(num_restarts):
-                    dict_name = f'{compression_type}_{start}_{lr}'
-                    writer.writerow({
-                        'type': name,
-                        'epoch': epoch,
-                        'train_log': train_log[dict_name][restart][epoch],
-                        'train_acc': train_acc[dict_name][restart][epoch],
-                        'test_log': test_log[dict_name][restart][epoch],
-                        'test_acc': test_acc[dict_name][restart][epoch]
-                    })
-
-    fig_train, axs_train = plt.subplots(1, 2, figsize=(16, 7))
-    fig_test, axs_test = plt.subplots(1, 2, figsize=(16, 7))
-
-
-    for compress_config in compress_configs:
-        compression_type = compress_config['compression_type']
-
-        start = compress_config.get('start', '')
-        lr = compress_config.get('lr', '')
-        eta = compress_config.get('eta', '')
-        num_steps = compress_config.get('num_steps', '')
-
-        name = f'{compression_type}_{start}_{lr}'
-
-        train_loss = np.array(train_log[name])
-        train_loss_mean = np.mean(train_loss, axis=0)
-        train_loss_std = np.std(train_loss, axis=0)
-        
-        train_accuracy = np.array(train_acc[name])
-        train_accuracy_mean = np.mean(train_accuracy, axis=0)
-        train_accuracy_std = np.std(train_accuracy, axis=0)
-        
-        test_loss = np.array(test_log[name])
-        test_loss_mean = np.mean(test_loss, axis=0)
-        test_loss_std = np.std(test_loss, axis=0)
-        
-        test_accuracy = np.array(test_acc[name])
-        test_accuracy_mean = np.mean(test_accuracy, axis=0)
-        test_accuracy_std = np.std(test_accuracy, axis=0)
-        
-        iters = list(range(len(train_loss_mean)))
-        
-        axs_train[0].plot(iters, train_loss_mean, label=f'{compression_type}, lr={lr}, start={start}')
-        axs_train[0].fill_between(iters, train_loss_mean - train_loss_std, train_loss_mean + train_loss_std, alpha=0.1)
-        
-        axs_train[1].plot(iters, train_accuracy_mean, label=f'{compression_type}, lr={lr}, start={start}')
-        axs_train[1].fill_between(iters, train_accuracy_mean - train_accuracy_std, train_accuracy_mean + train_accuracy_std, alpha=0.1)
-
-        axs_test[0].plot(iters, test_loss_mean, label=f'{compression_type}, lr={lr}, start={start}')
-        axs_test[0].fill_between(iters, test_loss_mean - test_loss_std, test_loss_mean + test_loss_std, alpha=0.1)
-        
-        axs_test[1].plot(iters, test_accuracy_mean, label=f'{compression_type}, lr={lr}, start={start}')
-        axs_test[1].fill_between(iters, test_accuracy_mean - test_accuracy_std, test_accuracy_mean + test_accuracy_std, alpha=0.1)
-
-    axs_train[0].set_title(f"Comparison on Train, different compression types, param_usage={param_usage}")
-    axs_train[0].set_xlabel("Epoch")
-    axs_train[0].set_ylabel("Loss")
-    axs_train[0].legend()
-    axs_train[0].grid()
-
-    axs_train[1].set_title(f"Comparison on Train, different compression types, param_usage={param_usage}")
-    axs_train[1].set_xlabel("Epoch")
-    axs_train[1].set_ylabel("Accuracy")
-    axs_train[1].legend()
-    axs_train[1].grid()
-        
-
-    axs_test[0].set_title(f"Comparison on Test, different compression types, param_usage={param_usage}")
-    axs_test[0].set_xlabel("Epoch")
-    axs_test[0].set_ylabel("Loss")
-    axs_test[0].legend()
-    axs_test[0].grid()
-
-    axs_test[1].set_title(f"Comparison on Test, different compression types, param_usage={param_usage}")
-    axs_test[1].set_xlabel("Epoch")
-    axs_test[1].set_ylabel("Accuracy")
-    axs_test[1].legend()
-    axs_test[1].grid()
-
-    date = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-
-    # Check if the directory 'figures' exists, if not, create it
-    figures_dir = 'figures'
-    if not os.path.exists(figures_dir):
-        os.makedirs(figures_dir)
-
-    # Save the train plot in the 'figures' directory
-    fig_train.savefig(os.path.join(figures_dir, f"train_comparison_param_usage_{param_usage}_{date}.png"))
-
-    # Save the test plot in the 'figures' directory
-    fig_test.savefig(os.path.join(figures_dir, f"test_comparison_param_usage_{param_usage}_{date}.png"))
-
-    fig_train.show()
-    fig_test.show()
+        if '_c_' not in compression_type:
+            filename = f"{compression_type}_{int(100 * param_usage)}%_{lr}.txt"
+        else:
+            filename = f"{compression_type}_[0,{int(scale)}]_{int(1000 * param_usage) / 10}%_{lr}.txt"
+        with open(filename, "w") as file:
+            file.write(f'{train_log=}, {train_acc=}, {test_log=}, {test_acc=}')
