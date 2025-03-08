@@ -251,16 +251,15 @@ class ImpK_c:
     def compress(self, name, param):
         k = ceil(self.k * param.numel())
 
-        tensor = param.grad * self.w[name]
-        tensor = tensor.view(-1)  # Flatten the tensor to a vector
+        tensor = (param.grad * self.w[name]).view(-1) # Flatten the tensor to a vector
         topk_values, topk_indices = tensor.abs().topk(k)
         mask = torch.zeros_like(tensor, dtype=torch.bool)
         mask.scatter_(0, topk_indices, True)
-        tensor = tensor.view(param.grad.size())  # Reshape back to original size
-        mask = mask.view(tensor.size())
         
         # Apply mask to tensor
         compressed_tensor = tensor * mask
+        compressed_tensor = compressed_tensor.view(param.grad.size())
+
         return compressed_tensor
 
 class ImpK_c_EF21:
@@ -347,14 +346,17 @@ class ImpK_c_EF:
 
     def compress(self, name, param):
         k = ceil(self.k * param.numel())
-        tensor = (param.grad * self.w[name] + self.e[name]).view(-1)  # Flatten the tensor to a vector
+        
+        tensor = ((param.grad + self.e[name]) * self.w[name]).view(-1)  # Flatten the tensor to a vector
         topk_values, topk_indices = tensor.abs().topk(k)
         mask = torch.zeros_like(tensor, dtype=torch.bool)
         mask.scatter_(0, topk_indices, True)
         compressed_tensor = tensor * mask
+        compressed_tensor *= k / (self.w[name].flatten()[topk_indices].sum())
         compressed_tensor = compressed_tensor.view(param.grad.size())  # Reshape back to original size
         # update e
         self.e[name] += param.grad - compressed_tensor
+
         return compressed_tensor
     
     
