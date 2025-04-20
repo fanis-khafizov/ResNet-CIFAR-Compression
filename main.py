@@ -18,104 +18,135 @@ if __name__ == "__main__":
     config = {
         'param_usage': 0.01,
         'num_restarts': 1,
-        'num_epochs': 12,
+        'num_epochs': 1,
     }
 
+    # list of compressor configurations
     compress_configs = [
-        # {
-        #     'compression_type': 'TopK',
-        #     'lr': 0.005,
-        # },
-        # {
-        #     'compression_type': 'TopK',
-        #     'lr': 0.01,
-        # },
-        # {
-        #     'compression_type': 'TopK',
-        #     'lr': 0.02,
-        # },
-        # {
-        #     'compression_type': 'TopK',
-        #     'lr': 0.05,
-        # },
-        # {
-        #     'compression_type': 'TopK_EF',
-        #     'lr': 0.01,
-        # },
-        # {
-        #     'compression_type': 'ImpK_b_EF',
-        #     'start': 'ones',
-        #     'lr': 0.001,
-        #     'eta': 1000000.,
-        #     'num_steps': 25,
-        # },
+        # TopK no error-feedback
         {
-            'compression_type': 'SCAM_b_EF',
-            'start': 'ones',
+            'name': 'TopK',
+            'strategy': 'TopK',
+            'error_correction': 'none',
+            'update_task': None,
+            'update_kwargs': {},
             'lr': 0.01,
-            'eta': 1000000.,
+        },
+        # TopK with EF
+        {
+            'name': 'TopK_EF',
+            'strategy': 'TopK',
+            'error_correction': 'EF',
+            'update_task': None,
+            'update_kwargs': {},
+            'lr': 0.0025,
+        },
+        # ImpK mirror descent + EF
+        {
+            'name': 'ImpK_b_EF',
+            'strategy': 'ImpK',
+            'error_correction': 'EF',
+            'update_task': 'mirror_descent',
+            'update_kwargs': {'lambda_value': 0.001, 'start': 'ones'},
+            'lr': 0.0025,
+            'eta': 1e6,
             'num_steps': 25,
         },
-        # {
-        #     'compression_type': 'ImpK_b',
-        #     'start': 'ones',
-        #     'lr': 0.01,
-        #     'eta': 7.,
-        #     'num_steps': 25,
-        # },
-        # {
-        #     'compression_type': 'ImpK_b',
-        #     'start': 'ones',
-        #     'lr': 0.02,
-        #     'eta': 2.,
-        #     'num_steps': 20,
-        # },
-        # {
-        #     'compression_type': 'ImpK_b',
-        #     'start': 'abs',
-        #     'lr': 0.01,
-        #     'eta': 2.,
-        #     'num_steps': 20,
-        # },
-        # {
-        #     'compression_type': 'ImpK_c_EF21',
-        #     'start': 'ones',
-        #     'lr': 0.01,
-        #     'eta': 1000000.,
-        #     'num_steps': 25,
-        #     'scale': 1.0,
-        # },
-        # {
-        #     'compression_type': 'ImpK_c',
-        #     'start': 'ones',
-        #     'lr': 0.015,
-        #     'eta': 1000000.,
-        #     'num_steps': 20,
-        #     'scale': 1.0,
-        # },
-        # {
-        #     'compression_type': 'ImpK_c',
-        #     'start': 'ones',
-        #     'lr': 0.02,
-        #     'eta': 1000000.,
-        #     'num_steps': 20,
-        #     'scale': 1.0,
-        # },
-        # {
-        #     'compression_type': 'ImpK_c_EF',
-        #     'start': 'ones',
-        #     'lr': 0.001,
-        #     'eta': 1000000.,
-        #     'num_steps': 25,
-        #     'scale': 1.0,
-        # },
+        # SCAM mirror descent + EF
         {
-            'compression_type': 'SCAM_c_EF',
-            'start': 'ones',
+            'name': 'SCAM_b_EF',
+            'strategy': 'SCAM',
+            'error_correction': 'EF',
+            'update_task': 'mirror_descent',
+            'update_kwargs': {'lambda_value': 0.001, 'start': 'ones'},
             'lr': 0.01,
-            'eta': 1000000.,
+            'eta': 1e6,
             'num_steps': 25,
-            'scale': 1.0,
+        },
+        # ImpK mirror descent no EF
+        {
+            'name': 'ImpK_b',
+            'strategy': 'ImpK',
+            'error_correction': 'none',
+            'update_task': 'mirror_descent',
+            'update_kwargs': {'lambda_value': 0.001, 'start': 'ones'},
+            'lr': 0.01,
+            'eta': 7.0,
+            'num_steps': 25,
+        },
+        # ImpK gradient descent no EF
+        {
+            'name': 'ImpK_c',
+            'strategy': 'ImpK',
+            'error_correction': 'none',
+            'update_task': 'gradient_descent',
+            'update_kwargs': {'start': 'ones', 'scale': 1.0},
+            'lr': 0.01,
+            'eta': 1e6,
+            'num_steps': 25,
+        },
+        # ImpK gradient descent + EF
+        {
+            'name': 'ImpK_c_EF',
+            'strategy': 'ImpK',
+            'error_correction': 'EF',
+            'update_task': 'gradient_descent',
+            'update_kwargs': {'start': 'ones', 'scale': 1.0},
+            'lr': 0.0025,
+            'eta': 1e6,
+            'num_steps': 25,
+        },
+        # SCAM gradient descent + EF
+        {
+            'name': 'SCAM_c_EF',
+            'strategy': 'SCAM',
+            'error_correction': 'EF',
+            'update_task': 'gradient_descent',
+            'update_kwargs': {'start': 'ones', 'scale': 1.0},
+            'lr': 0.01,
+            'eta': 1e6,
+            'num_steps': 25,
+        },
+        # Full-gradient updates for Impact methods with EF
+        {
+            'name': 'ImpK_b_EF_full',
+            'strategy': 'ImpK',
+            'error_correction': 'EF',
+            'update_task': 'mirror_descent_full',
+            'update_kwargs': {'lambda_value': 0.001, 'start': 'ones'},
+            'lr': 0.0025,
+            'eta': 1e6,
+            'num_steps': 25,
+        },
+        {
+            'name': 'SCAM_b_EF_full',
+            'strategy': 'SCAM',
+            'error_correction': 'EF',
+            'update_task': 'mirror_descent_full',
+            'update_kwargs': {'lambda_value': 0.001, 'start': 'ones'},
+            'lr': 0.01,
+            'eta': 1e6,
+            'num_steps': 25,
+        },
+        {
+            'name': 'ImpK_c_EF_full',
+            'strategy': 'ImpK',
+            'error_correction': 'EF',
+            'update_task': 'gradient_descent_full',
+            'update_kwargs': {'start': 'ones', 'scale': 1.0},
+            'lr': 0.0025,
+            'eta': 1e6,
+            'num_steps': 25,
+        },
+        {
+            'name': 'SCAM_c_EF_full',
+            'strategy': 'SCAM',
+            'error_correction': 'EF',
+            'update_task': 'gradient_descent_full',
+            'update_kwargs': {'start': 'ones', 'scale': 1.0},
+            'lr': 0.01,
+            'eta': 1e6,
+            'num_steps': 25,
         },
     ]
 
@@ -128,13 +159,17 @@ if __name__ == "__main__":
     num_epochs = config['num_epochs']
 
     for compress_config in compress_configs:
-        compression_type = compress_config['compression_type']
-
-        start = compress_config.get('start', '')
-        lr = compress_config.get('lr', '')
-        eta = compress_config.get('eta', '')
-        num_steps = compress_config.get('num_steps', '')
-        scale=compress_config.get('scale', '')
+        compression_type = compress_config['name']
+        # load settings from config
+        start       = compress_config.get('start', '')
+        lr          = compress_config.get('lr', '')
+        eta         = compress_config.get('eta', '')
+        num_steps   = compress_config.get('num_steps', '')
+        scale       = compress_config.get('scale', '')
+        strategy    = compress_config['strategy']
+        error_corr  = compress_config['error_correction']
+        update_task = compress_config.get('update_task')
+        update_kwargs = compress_config.get('update_kwargs', {})
 
         name = f'{compression_type}_{start}_{lr}'
 
@@ -143,33 +178,15 @@ if __name__ == "__main__":
         for num_restart in range(num_restarts):
             set_seed(52 + num_restart)
             net = models.ResNet18().to(device)
-
-            if compression_type == 'TopK':
-                compressor = compressors.TopK(param_usage)
-            elif compression_type == 'TopK_EF':
-                compressor = compressors.TopK_EF(param_usage, net)
-            elif compression_type == 'TopK_EF21':
-                compressor = compressors.TopK_EF21(param_usage, net)
-            elif compression_type == 'RandK':
-                compressor = compressors.RandK(param_usage)
-            elif compression_type == 'ImpK_b':
-                compressor = compressors.ImpK_b(net, param_usage, start=start)
-            elif compression_type == 'ImpK_b_EF':
-                compressor = compressors.ImpK_b_EF(net, param_usage, start=start)
-            elif compression_type == 'ImpK_b_EF21':
-                compressor = compressors.ImpK_b_EF21(net, param_usage, start=start)
-            elif compression_type == 'ImpK_c':
-                compressor = compressors.ImpK_c(net, param_usage, start=start, scale=scale)
-            elif compression_type == 'ImpK_c_EF':
-                compressor = compressors.ImpK_c_EF(net, param_usage, start=start, scale=scale)
-            elif compression_type == 'ImpK_c_EF21':
-                compressor = compressors.ImpK_c_EF21(net, param_usage, start=start, scale=scale)
-            elif compression_type == 'SCAM_b_EF':
-                compressor = compressors.SCAM_b_EF(net, param_usage, start=start)
-            elif compression_type == 'SCAM_c_EF':
-                compressor = compressors.SCAM_c_EF(net, param_usage, start=start, scale=scale)
-            else:
-                raise ValueError(f"Unknown compression type: {compression_type}")
+            # Use per-config param_usage override if provided
+            compressor = compressors.Compressor(
+                model=net,
+                k=compress_config.get('param_usage', param_usage),
+                strategy=strategy,
+                error_correction=error_corr,
+                update_task=update_task,
+                update_kwargs=update_kwargs
+            )
             
             optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=5e-4)
             criterion = nn.CrossEntropyLoss()
@@ -223,7 +240,8 @@ if __name__ == "__main__":
         writer.writeheader()
 
         for compress_config in compress_configs:
-            compression_type = compress_config['compression_type']
+            # use 'name' field for compression type
+            compression_type = compress_config['name']
             start = compress_config.get('start', '')
             lr = compress_config.get('lr', '')
             eta = compress_config.get('eta', '')
@@ -248,7 +266,8 @@ if __name__ == "__main__":
 
 
     for compress_config in compress_configs:
-        compression_type = compress_config['compression_type']
+        # use 'name' for compression type
+        compression_type = compress_config['name']
 
         start = compress_config.get('start', '')
         lr = compress_config.get('lr', '')
