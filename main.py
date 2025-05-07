@@ -23,7 +23,7 @@ if __name__ == "__main__":
     train_config = {
         'param_usage': 0.02,
         'num_restarts': 1,
-        'num_epochs': 1,
+        'num_epochs': 50,
     }
     # Извлечение настроек из train_config
     param_usage = train_config['param_usage']
@@ -33,13 +33,12 @@ if __name__ == "__main__":
     configs = [
         ExperimentConfig(train_config, name='TopK_0.01', strategy='TopK', lr=0.01, optimizer=CSGD),
         ExperimentConfig(train_config, name='TopK_EF_0.0025', strategy='TopK', error_correction='EF', lr=0.0025, optimizer=CSGD),
-        ExperimentConfig(train_config, name='ImpK_b_EF_0.0025', strategy='ImpK', error_correction='EF', update_task='mirror_descent_full', update_kwargs={'lambda_value':1e-6,'start':'ones'}, lr=0.0025, eta=1e6, num_steps=25, optimizer=CSGD),
+        ExperimentConfig(train_config, name='ImpK_b_EF_0.0025', strategy='ImpK', error_correction='EF', update_task='mirror_descent_full', update_kwargs={'lambda_value':1e-3,'start':'ones'}, lr=0.0025, eta=1e6, num_steps=25, optimizer=CSGD),
         ExperimentConfig(train_config, name='ImpK_c_EF_0.0025', strategy='ImpK', error_correction='EF', update_task='gradient_descent_full', update_kwargs={'scale':1.0,'start':'ones'}, lr=0.0025, eta=1e6, num_steps=25, optimizer=CSGD),
-        ExperimentConfig(train_config, name='SCAM_b_EF_0.0025', strategy='SCAM', error_correction='EF', update_task='mirror_descent_full', update_kwargs={'lambda_value':1e-6,'start':'ones'}, lr=0.0025, eta=1e3, num_steps=25, optimizer=CSGD),
-        ExperimentConfig(train_config, name='SCAM_c_EF_0.0025', strategy='SCAM', error_correction='EF', update_task='gradient_descent_full', update_kwargs={'scale':1.0,'start':'ones'}, lr=0.0025, eta=1e6, num_steps=25, optimizer=CSGD),
+        ExperimentConfig(train_config, name='ImpK_c_10_EF_0.0025', strategy='ImpK', error_correction='EF', update_task='gradient_descent_full', update_kwargs={'scale':10.0,'start':'ones'}, lr=0.0025, eta=1e6, num_steps=25, optimizer=CSGD),
         ExperimentConfig(train_config, name='SCAM_TopK_0.01', strategy='SCAM_TopK', lr=0.01, optimizer=CSGD),
-        ExperimentConfig(train_config, name='SCAM_b_EF_0.01', strategy='SCAM', error_correction='EF', update_task='mirror_descent_full', update_kwargs={'lambda_value':1e-6,'start':'ones'}, lr=0.01, eta=1e6, num_steps=25, optimizer=CSGD),
-        ExperimentConfig(train_config, name='SCAM_c_EF_0.01', strategy='SCAM', error_correction='EF', update_task='gradient_descent_full', update_kwargs={'scale':1.0,'start':'ones'}, lr=0.01, eta=1e6, num_steps=25, optimizer=CSGD),
+        ExperimentConfig(train_config, name='SCAM_b_EF_0.01', strategy='SCAM', error_correction='EF', update_task='mirror_descent_full', update_kwargs={'lambda_value':1e-3,'start':'ones'}, lr=0.01, eta=1e6, num_steps=25, optimizer=CSGD),
+        ExperimentConfig(train_config, name='SCAM_c_10_EF_0.01', strategy='SCAM', error_correction='EF', update_task='gradient_descent_full', update_kwargs={'scale':10.0,'start':'ones'}, lr=0.01, eta=1e6, num_steps=25, optimizer=CSGD),
     ]
     for cfg in configs:
         experiment = Experiment(cfg, trainloader, testloader, device, param_usage, num_epochs, num_restarts)
