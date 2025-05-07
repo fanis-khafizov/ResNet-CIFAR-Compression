@@ -6,3 +6,5 @@ scipy
 pandas
 tqdm
 scikit-learn
+wandb
+dotenv
