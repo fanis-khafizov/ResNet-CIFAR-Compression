@@ -23,7 +23,7 @@ if __name__ == "__main__":
     train_config = {
         'param_usage': 0.01,
         'num_restarts': 1,
-        'num_epochs': 1,
+        'num_epochs': 50,
     }
     # Извлечение настроек из train_config
     param_usage = train_config['param_usage']
