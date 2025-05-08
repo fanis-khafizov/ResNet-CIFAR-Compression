@@ -54,7 +54,10 @@ class ExperimentConfig:
             reinit=True
         )
 
-    def get_dict_name(self):
-        start = self.update_kwargs.get("start", "")
-        return f"{self.strategy}_{start}_{self.lr}"
-# -----------------------------
+    def log(self, train_loss, train_acc, val_loss, val_acc, epoch):
+        wandb.log({
+            'train/loss': train_loss,
+            'train/acc': train_acc,
+            'val/loss': val_loss,
+            'val/acc': val_acc
+        }, step=epoch)

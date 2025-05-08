@@ -1,7 +1,9 @@
 import torch
 from tqdm import tqdm, trange
 
-def train(model, criterion, optimizer, compressor, trainloader, testloader, num_epochs, lr, eta, num_steps, device, logger, restart=0, quiet=True):
+def train(model, config, criterion, optimizer, compressor, trainloader, testloader, num_epochs, device, quiet=True):
+    lr, eta, num_steps = config.lr, config.eta, config.num_steps
+
     train_losses, train_accs = [], []
     val_losses, val_accs = [], []
     for epoch in trange(num_epochs):
@@ -16,7 +18,7 @@ def train(model, criterion, optimizer, compressor, trainloader, testloader, num_
             inputs, targets = inputs.to(device), targets.to(device)
 
             if batch_idx == 0:
-                compressor.update(inputs, targets, criterion, lr, eta, num_steps)
+                compressor.update(inputs, targets, criterion)
             
             optimizer.zero_grad()
 
@@ -58,7 +60,7 @@ def train(model, criterion, optimizer, compressor, trainloader, testloader, num_
         val_losses.append(val_loss)
         val_accs.append(val_acc)
         
-        logger.log(epoch, restart, train_loss, train_acc, val_loss, val_acc)
+        config.log(train_loss, train_acc, val_loss, val_acc, epoch)
         
         if not quiet:
             print(f"Epoch {epoch+1}, Train Loss: {train_loss}, Val Loss: {val_loss}")

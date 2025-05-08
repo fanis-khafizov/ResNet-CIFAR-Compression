@@ -1,14 +1,15 @@
 from math import ceil
 import torch
-from descent import gradient_descent, mirror_descent, gradient_descent_full, mirror_descent_full
+from descent import gradient_descent, mirror_descent
 
 # Generic configurable compressor to select strategy, error correction, and update task
 class Compressor:
-    def __init__(self, model, k, strategy='TopK', error_correction='none', update_task=None, update_kwargs=None):
+    def __init__(self, model, k, strategy='TopK', error_correction='none', update_task=None, lr=None, update_kwargs=None):
         self.model = model
         self.k = k
         self.strategy = strategy
         self.error_correction = error_correction
+        self.lr = lr
         self.update_task = update_task
         self.update_kwargs = update_kwargs or {}
         self.w = {}
@@ -26,61 +27,33 @@ class Compressor:
     def skip(self, name):
         return 'bn' in name or 'shortcut.1' in name
 
-    def update(self, X_train, y_train, criterion, lr, eta, num_steps):
+    def update(self, X_train, y_train, criterion):
         if not self.update_task:
             return
-        # full update across all parameters
-        if self.update_task in ('mirror_descent_full', 'gradient_descent_full'):
-            update_fn = {
-                'mirror_descent_full': mirror_descent_full,
-                'gradient_descent_full': gradient_descent_full
-            }[self.update_task]
-            # call full-impact update
-            # include error buffer if EF
-            full_kwargs = dict(self.update_kwargs)
-            if self.error_correction == 'EF':
-                full_kwargs['errors'] = self.e
-            self.w = update_fn(
-                self.model,
-                X_train,
-                y_train,
-                self.w,
-                lr,
-                eta,
-                **full_kwargs,
-                num_steps=num_steps,
-                criterion=criterion
-            )
-            return
-        # per-parameter update
+        
         update_fn = {
             'mirror_descent': mirror_descent,
             'gradient_descent': gradient_descent
         }[self.update_task]
-        for name, param in self.model.named_parameters():
-            if self.skip(name):
-                continue
-            impact = self.w[name]
-            # call per-parameter update with possible EF buffer
-            per_kwargs = dict(self.update_kwargs)
-            if self.error_correction == 'EF':
-                per_kwargs['error'] = self.e[name]
-            self.w[name] = update_fn(
-                self.model,
-                X_train,
-                y_train,
-                name,
-                impact,
-                lr,
-                eta,
-                **per_kwargs,
-                num_steps=num_steps,
-                criterion=criterion
-            )
+
+        full_kwargs = dict(self.update_kwargs)
+
+        if self.error_correction == 'EF':
+            full_kwargs['errors'] = self.e
+        
+        self.w = update_fn(
+            self.model,
+            X_train,
+            y_train,
+            lr=self.lr,
+            **full_kwargs,
+            criterion=criterion
+        )
 
     def compress(self, name, param):
         with torch.no_grad():
             k = ceil(self.k * param.numel())
+
             grad = param.grad.detach()
             if self.error_correction == 'EF':
                 grad = grad + self.e[name]
@@ -90,14 +63,14 @@ class Compressor:
             # apply strategy
             if self.strategy == 'TopK':
                 flat = grad.view(-1)
-                topk_vals, topk_idx = flat.abs().topk(k)
+                _, topk_idx = flat.abs().topk(k)
                 mask = torch.zeros_like(flat, dtype=torch.bool)
                 mask.scatter_(0, topk_idx, True)
                 comp = mask.view(param.grad.size()) * grad
             elif self.strategy == 'ImpK':
                 weighted_grad = grad * self.w[name]
                 flat = weighted_grad.view(-1)
-                topk_vals, topk_idx = flat.abs().topk(k)
+                _, topk_idx = flat.abs().topk(k)
                 mask = torch.zeros_like(flat, dtype=torch.bool)
                 mask.scatter_(0, topk_idx, True)
                 comp_flat = flat * mask
@@ -106,14 +79,14 @@ class Compressor:
             elif self.strategy == 'SCAM':
                 weighted_grad = grad * self.w[name]
                 flat = weighted_grad.view(-1)
-                topk_vals, topk_idx = flat.abs().topk(k)
+                _, topk_idx = flat.abs().topk(k)
                 mask = torch.zeros_like(flat)
                 mask[topk_idx] = self.w[name].view(-1)[topk_idx]
                 mask = mask * (k / mask.sum())
                 comp = param.grad * mask.view(param.grad.size())
             elif self.strategy == 'SCAM_TopK':
                 flat = grad.view(-1)
-                topk_vals, topk_idx = flat.abs().topk(k)
+                _, topk_idx = flat.abs().topk(k)
                 mask = torch.zeros_like(flat, dtype=torch.bool)
                 mask.scatter_(0, topk_idx, True)
                 comp = mask.view(param.grad.size()) * param.grad
