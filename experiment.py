@@ -18,15 +18,18 @@ class Experiment:
         self.num_restarts = num_restarts
 
     def run(self):
-        # Initialize W&B
-        self.config.init_wandb()
-
         for restart in range(self.num_restarts):
+            # Initialize W&B for each restart
+            wandb.init(
+                project=self.config.project_name,
+                name=f"{self.config.name}_restart_{restart}",
+                config=self.config.__dict__
+            )
+
             set_seed(52 + restart)
 
             # Create ResNet18 model
             model = ResNet18().to(self.device)
-            # model = torch.compile(model)
 
             # Set up criterion and compressor
             criterion = CrossEntropyLoss()
@@ -36,7 +39,7 @@ class Experiment:
                 strategy=self.config.strategy,
                 error_correction=self.config.error_correction,
                 update_task=self.config.update_task,
-                lr = self.config.lr,
+                lr=self.config.lr,
                 update_kwargs=self.config.update_kwargs
             )
 
@@ -60,5 +63,5 @@ class Experiment:
                 device=self.device,
             )
 
-        # Finish W&B
-        wandb.finish()
+            # Finish W&B for the current restart
+            wandb.finish()
