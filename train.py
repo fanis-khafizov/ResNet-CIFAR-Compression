@@ -26,7 +26,7 @@ def train(model, config, criterion, optimizer, compressor, trainloader, testload
             if batch_idx == 0:
                 compressor.update(inputs, targets, criterion)
                 update_time = time.time() - start_time
-                wandb.log({"train/update_time": update_time})
+                wandb.log({"train/update_time": update_time}, step=epoch)
 
             optimizer.zero_grad()
 
@@ -48,7 +48,7 @@ def train(model, config, criterion, optimizer, compressor, trainloader, testload
 
         # Measure train epoch time
         train_epoch_time = time.time() - start_time
-        wandb.log({"train/epoch_time": train_epoch_time})
+        wandb.log({"train/epoch_time": train_epoch_time}, step=epoch)
 
         # Validation
         model.eval()
@@ -74,10 +74,9 @@ def train(model, config, criterion, optimizer, compressor, trainloader, testload
 
         # Measure validation epoch time
         val_epoch_time = time.time() - val_start_time
-        wandb.log({"val/epoch_time": val_epoch_time})
+        wandb.log({"val/epoch_time": val_epoch_time}, step=epoch)
 
         # Log metrics and epoch time
-        epoch_time = time.time() - start_time
         config.log(train_loss, train_acc, val_loss, val_acc, epoch)
 
         if not quiet:
