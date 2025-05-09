@@ -54,7 +54,6 @@ class Experiment:
             # Training loop with logging
             train(
                 model=model,
-                config=self.config,
                 criterion=criterion,
                 optimizer=optimizer,
                 compressor=compressor,

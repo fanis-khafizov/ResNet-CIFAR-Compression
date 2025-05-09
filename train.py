@@ -4,15 +4,10 @@ import time
 
 import wandb
 
-def train(model, config, criterion, optimizer, compressor, trainloader, testloader, num_epochs, device, quiet=True):
-    lr, eta, num_steps = config.lr, config.eta, config.num_steps
-
+def train(model, criterion, optimizer, compressor, trainloader, testloader, num_epochs, device):
     train_losses, train_accs = [], []
     val_losses, val_accs = [], []
     for epoch in trange(num_epochs):
-
-        if not quiet:
-            tqdm.write('\nEpoch: %d' % epoch)
         model.train()
         train_loss = 0
         correct = 0
@@ -84,9 +79,4 @@ def train(model, config, criterion, optimizer, compressor, trainloader, testload
             'val/acc': val_acc
         }, step=epoch)
 
-        if not quiet:
-            print(f"Epoch {epoch+1}, Train Loss: {train_loss}, Val Loss: {val_loss}")
-            print(f"Epoch {epoch+1}, Train PPL: {train_acc}, Val PPL: {val_acc}")
-    
-    
     return train_losses, train_accs, val_losses, val_accs
