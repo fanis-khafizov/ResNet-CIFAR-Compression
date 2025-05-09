@@ -77,7 +77,12 @@ def train(model, config, criterion, optimizer, compressor, trainloader, testload
         wandb.log({"val/epoch_time": val_epoch_time}, step=epoch)
 
         # Log metrics and epoch time
-        config.log(train_loss, train_acc, val_loss, val_acc, epoch)
+        wandb.log({
+            'train/loss': train_loss,
+            'train/acc': train_acc,
+            'val/loss': val_loss,
+            'val/acc': val_acc
+        }, step=epoch)
 
         if not quiet:
             print(f"Epoch {epoch+1}, Train Loss: {train_loss}, Val Loss: {val_loss}")

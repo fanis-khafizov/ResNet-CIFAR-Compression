@@ -45,19 +45,3 @@ class ExperimentConfig:
             "optimizer": self.optimizer.__name__,
             "optimizer_kwargs": self.optimizer_kwargs,
         }
-
-    def init_wandb(self):
-        wandb.init(
-            project=self.project_name,
-            name=self.name,
-            config={**self.train_config, **self.to_dict()},
-            reinit=True
-        )
-
-    def log(self, train_loss, train_acc, val_loss, val_acc, epoch):
-        wandb.log({
-            'train/loss': train_loss,
-            'train/acc': train_acc,
-            'val/loss': val_loss,
-            'val/acc': val_acc
-        }, step=epoch)

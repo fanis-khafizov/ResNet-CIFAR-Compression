@@ -23,7 +23,8 @@ class Experiment:
             wandb.init(
                 project=self.config.project_name,
                 name=f"{self.config.name}_restart_{restart}",
-                config=self.config.__dict__
+                config={**self.config.train_config, **self.config.to_dict()},
+                reinit=True
             )
 
             set_seed(52 + restart)
