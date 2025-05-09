@@ -1,6 +1,7 @@
 from math import ceil
 import torch
 from descent import gradient_descent, mirror_descent
+import matplotlib.pyplot as plt
 
 # Generic configurable compressor to select strategy, error correction, and update task
 class Compressor:
@@ -49,6 +50,15 @@ class Compressor:
             **full_kwargs,
             criterion=criterion
         )
+
+        for name, param in self.model.named_parameters():
+            if not self.skip(name):
+                plt.hist(self.w[name].view(-1).cpu().numpy(), bins=100, alpha=0.5, label=name)
+                plt.title(f"Histogram of {name}")
+                plt.xlabel("Value")
+                plt.ylabel("Frequency")
+                plt.legend()
+                plt.show()
 
     def compress(self, name, param):
         with torch.no_grad():

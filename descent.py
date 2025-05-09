@@ -10,7 +10,7 @@ def mirror_descent(model, X_train, y_train, lr, eta, lambda_value, num_steps, cr
         base_grads = [g + errors[name] for g, (name, _) in zip(base_grads, model.named_parameters())]
 
     # 2) инициализируем impacts
-    impacts = {name: torch.zeros_like(param, requires_grad=True) for name, param in model.named_parameters()}
+    impacts = {name: torch.ones_like(param, requires_grad=True) for name, param in model.named_parameters()}
 
     # 3) подготовим «новые» параметры на каждый шаг
     new_params = {n: p.clone() for n, p in model.named_parameters()}
@@ -58,7 +58,7 @@ def gradient_descent(model, X_train, y_train, lr, eta, scale, num_steps, criteri
         base_grads = [g + errors[name] for g, (name, _) in zip(base_grads, model.named_parameters())]
 
     # 2) инициализируем impacts
-    impacts = {name: torch.zeros_like(param, requires_grad=True) for name, param in model.named_parameters()}
+    impacts = {name: torch.ones_like(param, requires_grad=True) for name, param in model.named_parameters()}
 
     # 3) подготовим «новые» параметры на каждый шаг
     new_params = {n: p.clone() for n, p in model.named_parameters()}
