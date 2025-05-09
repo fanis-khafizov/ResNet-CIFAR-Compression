@@ -51,14 +51,14 @@ class Compressor:
             criterion=criterion
         )
 
-        for name, param in self.model.named_parameters():
-            if not self.skip(name):
-                plt.hist(self.w[name].view(-1).cpu().numpy(), bins=100, alpha=0.5, label=name)
-                plt.title(f"Histogram of {name}")
-                plt.xlabel("Value")
-                plt.ylabel("Frequency")
-                plt.legend()
-                plt.show()
+        # for name, param in self.model.named_parameters():
+        #     if not self.skip(name):
+        #         plt.hist(self.w[name].view(-1).cpu().numpy(), bins=100, alpha=0.5, label=name)
+        #         plt.title(f"Histogram of {name}")
+        #         plt.xlabel("Value")
+        #         plt.ylabel("Frequency")
+        #         plt.legend()
+        #         plt.show()
 
     def compress(self, name, param):
         with torch.no_grad():
