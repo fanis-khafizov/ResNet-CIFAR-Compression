@@ -31,12 +31,12 @@ if __name__ == "__main__":
     num_epochs = train_config['num_epochs']
 
     configs = [
-        ExperimentConfig(train_config, name='ImpK_b_0.001', strategy='ImpK', update_task='mirror_descent', update_kwargs={'lambda_value':1e-4,'eta':1e7,'num_steps':50}, lr=0.001, optimizer=CAdamW),
-        ExperimentConfig(train_config, name='ImpK_c_0.001', strategy='ImpK', update_task='gradient_descent', update_kwargs={'scale':2.0,'eta':1e7,'num_steps':50}, lr=0.001, optimizer=CAdamW),
-        ExperimentConfig(train_config, name='ImpK_b_EF_0.002', strategy='ImpK', error_correction='EF', update_task='mirror_descent', update_kwargs={'lambda_value':1e-4,'eta':1e7,'num_steps':50}, lr=0.002, optimizer=CAdamW),
-        ExperimentConfig(train_config, name='ImpK_c_EF_0.002', strategy='ImpK', error_correction='EF', update_task='gradient_descent', update_kwargs={'scale':2.0,'eta':1e7,'num_steps':50}, lr=0.002, optimizer=CAdamW),
-        ExperimentConfig(train_config, name='SCAM_b_EF_0.0001', strategy='SCAM', error_correction='EF', update_task='mirror_descent', update_kwargs={'lambda_value':1e-4,'eta':1e6,'num_steps':50}, lr=0.0001, optimizer=CAdamW),
-        ExperimentConfig(train_config, name='SCAM_c_EF_0.0001', strategy='SCAM', error_correction='EF', update_task='gradient_descent', update_kwargs={'scale':2.0,'eta':1e6,'num_steps':50}, lr=0.0001, optimizer=CAdamW),
+        ExperimentConfig(train_config, project_name='ResNet-CIFAR-Experiment1', name='ImpK_b_0.001', strategy='ImpK', update_task='mirror_descent', update_kwargs={'lambda_value':1e-3,'eta':1e7,'num_steps':50}, lr=0.001, optimizer=CAdamW),
+        ExperimentConfig(train_config, project_name='ResNet-CIFAR-Experiment1', name='ImpK_c_0.001', strategy='ImpK', update_task='gradient_descent', update_kwargs={'scale':2.0,'eta':1e7,'num_steps':50}, lr=0.001, optimizer=CAdamW),
+        ExperimentConfig(train_config, project_name='ResNet-CIFAR-Experiment1', name='ImpK_b_EF_0.002', strategy='ImpK', error_correction='EF', update_task='mirror_descent', update_kwargs={'lambda_value':1e-3,'eta':1e7,'num_steps':50}, lr=0.002, optimizer=CAdamW),
+        ExperimentConfig(train_config, project_name='ResNet-CIFAR-Experiment1', name='ImpK_c_EF_0.002', strategy='ImpK', error_correction='EF', update_task='gradient_descent', update_kwargs={'scale':2.0,'eta':1e7,'num_steps':50}, lr=0.002, optimizer=CAdamW),
+        ExperimentConfig(train_config, project_name='ResNet-CIFAR-Experiment1', name='SCAM_b_EF_0.0001', strategy='SCAM', error_correction='EF', update_task='mirror_descent', update_kwargs={'lambda_value':1e-3,'eta':1e6,'num_steps':50}, lr=0.0001, optimizer=CAdamW),
+        ExperimentConfig(train_config, project_name='ResNet-CIFAR-Experiment1', name='SCAM_c_EF_0.0001', strategy='SCAM', error_correction='EF', update_task='gradient_descent', update_kwargs={'scale':2.0,'eta':1e6,'num_steps':50}, lr=0.0001, optimizer=CAdamW),
     ]
     for cfg in configs:
         experiment = Experiment(cfg, trainloader, testloader, device, param_usage, num_epochs, num_restarts)
