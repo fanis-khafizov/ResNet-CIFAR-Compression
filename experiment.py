@@ -16,6 +16,7 @@ class Experiment:
         self.param_usage = param_usage
         self.num_epochs = num_epochs
         self.num_restarts = num_restarts
+        self.update_freq = config.update_freq  # Store the update frequency
 
     def run(self):
         for restart in range(self.num_restarts):
@@ -59,8 +60,9 @@ class Experiment:
                 compressor=compressor,
                 trainloader=self.trainloader,
                 testloader=self.testloader,
-                num_epochs=self.num_epochs,
+                num_epochs=self.num_epochs,  # Pass the full number of epochs
                 device=self.device,
+                update_freq=self.update_freq  # Pass update frequency
             )
 
             # Finish W&B for the current restart

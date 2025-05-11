@@ -17,7 +17,8 @@ class ExperimentConfig:
         num_steps: int = None,
         project_name: str = "ResNet-CIFAR-Compression",
         optimizer = CSGD,
-        optimizer_kwargs: dict = None
+        optimizer_kwargs: dict = None,
+        update_freq: int = 1  # New parameter with default value
     ):
         self.train_config = train_config
         self.name = name
@@ -31,6 +32,7 @@ class ExperimentConfig:
         self.project_name = project_name
         self.optimizer = optimizer
         self.optimizer_kwargs = optimizer_kwargs or {}
+        self.update_freq = update_freq  # Assign the new parameter
 
     def to_dict(self):
         return {
@@ -44,4 +46,5 @@ class ExperimentConfig:
             "num_steps": self.num_steps,
             "optimizer": self.optimizer.__name__,
             "optimizer_kwargs": self.optimizer_kwargs,
+            "update_freq": self.update_freq,  # Include the new parameter in the dictionary
         }

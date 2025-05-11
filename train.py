@@ -4,7 +4,7 @@ import time
 
 import wandb
 
-def train(model, criterion, optimizer, compressor, trainloader, testloader, num_epochs, device):
+def train(model, criterion, optimizer, compressor, trainloader, testloader, num_epochs, device, update_freq=1):
     train_losses, train_accs = [], []
     val_losses, val_accs = [], []
     for epoch in trange(num_epochs):
@@ -18,7 +18,7 @@ def train(model, criterion, optimizer, compressor, trainloader, testloader, num_
         for batch_idx, (inputs, targets) in enumerate(tqdm(trainloader)):
             inputs, targets = inputs.to(device), targets.to(device)
 
-            if batch_idx == 0:
+            if batch_idx == 0 and epoch % update_freq == 0:  # Update only if condition is met
                 compressor.update(inputs, targets, criterion)
                 update_time = time.time() - start_time
                 wandb.log({"train/update_time": update_time}, step=epoch)
